@@ -1,5 +1,10 @@
 // script.js
 
+// Proteksi Halaman: Cek apakah user sudah login
+if (localStorage.getItem('isLoggedIn') !== 'true') {
+    window.location.href = '../login.html';
+}
+
 const STORAGE_KEY = 'CMS_ARTIKEL_APP';
 let database = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 
@@ -106,6 +111,15 @@ function resetFormulir() {
 }
 
 document.getElementById('tombolBatal').addEventListener('click', resetFormulir);
+
+// Fungsi Logout
+window.logoutAdmin = () => {
+    if(confirm('Apakah Anda yakin ingin keluar?')) {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('userRole');
+        window.location.href = '../index.html';
+    }
+};
 
 // Jalankan saat pertama kali dibuka
 renderAplikasi();

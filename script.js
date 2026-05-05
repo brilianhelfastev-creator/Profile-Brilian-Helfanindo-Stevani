@@ -117,3 +117,50 @@ window.addEventListener("scroll", () => {
     }
   });
 });
+
+// Load articles from CMS (LocalStorage)
+const muatArtikel = () => {
+  const container = document.getElementById("daftarArtikelProfil");
+  if (!container) return;
+
+  const STORAGE_KEY = "CMS_ARTIKEL_APP";
+  const data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
+  if (data.length === 0) {
+    container.innerHTML = `
+      <div class="no-articles-msg">
+        <p>Belum ada artikel yang dipublikasikan.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = "";
+  // Tampilkan maksimal 6 artikel terbaru
+  const displayData = data.slice().reverse().slice(0, 6);
+
+  displayData.forEach((item) => {
+    const card = document.createElement("div");
+    card.className = "article-card";
+    
+    // Format tanggal jika ada (menggunakan ID sebagai timestamp jika tidak ada field tanggal)
+    const date = new Date(item.id).toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+
+    card.innerHTML = `
+      <span class="date">${date}</span>
+      <h3>${item.judul}</h3>
+      <p>${item.konten}</p>
+    `;
+    container.appendChild(card);
+  });
+};
+
+// Initial calls
+window.addEventListener("DOMContentLoaded", () => {
+  revealOnScroll();
+  muatArtikel();
+});

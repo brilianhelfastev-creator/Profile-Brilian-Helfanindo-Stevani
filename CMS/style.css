@@ -27,12 +27,20 @@ body {
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
 }
 
-header {
-    text-align: center;
+.cms-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 40px;
+    gap: 20px;
+    text-align: left;
 }
 
-header h1 {
+.cms-header .header-content {
+    flex: 1;
+}
+
+.cms-header h1 {
     font-size: 2.5rem;
     font-weight: 700;
     background: linear-gradient(to right, #3b82f6, #6366f1);
@@ -42,8 +50,24 @@ header h1 {
     margin-bottom: 10px;
 }
 
-header p {
+.cms-header p {
     color: #94a3b8;
+}
+
+.btn-logout {
+    background: rgba(244, 63, 94, 0.1);
+    color: #f43f5e;
+    border: 1px solid rgba(244, 63, 94, 0.2);
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+    background: #f43f5e;
+    color: white;
 }
 
 .form-section {
