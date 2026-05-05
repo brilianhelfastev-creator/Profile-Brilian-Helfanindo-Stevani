@@ -507,6 +507,22 @@ body {
     text-align: center;
   }
 
+  .profile-img-container {
+    max-width: 180px;
+    margin: 0 auto;
+  }
+
+  .info-list li {
+    flex-direction: column;
+    gap: 0.3rem;
+    justify-content: center;
+  }
+
+  .info-list li strong {
+    min-width: auto;
+    display: block;
+  }
+
   .profile-info {
     text-align: center;
   }
