@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard CMS | Brilian.dev</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <a href="../profil.htm" class="back-link">&larr; Kembali ke Profil</a>
+        
+        <header>
+            <h1>Dasbor Admin CMS</h1>
+            <p>Kelola konten artikel Anda dengan sistem manajemen yang modern.</p>
+        </header>
+
+        <!-- Form Input Artikel -->
+        <section class="form-section">
+            <form id="formArtikel">
+                <input type="hidden" id="artikelId">
+                
+                <div class="input-group">
+                    <label for="judul">Judul Artikel</label>
+                    <input type="text" id="judul" placeholder="Masukkan judul yang menarik...">
+                    <small class="pesan-error" id="errorJudul"></small>
+                </div>
+
+               
+                <div class="input-group">
+                    <label for="konten">Isi Konten</label>
+                    <textarea id="konten" rows="6" placeholder="Tuliskan pemikiran Anda di sini..."></textarea>
+                    <small class="pesan-error" id="errorKonten"></small>
+                </div>
+
+                <div class="aksi-form">
+                    <button type="submit" id="tombolSimpan" class="btn-utama">Simpan Artikel</button>
+                    <button type="button" id="tombolBatal" class="btn-batal" style="display:none;">Batal Edit</button>
+                </div>
+            </form>
+        </section>
+
+        <hr>
+
+        <!-- Area Tampilan Daftar Artikel -->
+        <section class="list-section">
+            <h3>Daftar Artikel Tersimpan</h3>
+            <div id="wadahArtikel" class="grid-artikel">
+                <!-- Artikel akan muncul di sini melalui JS -->
+            </div>
+        </section>
+    </div>
+
+    <!-- Menghubungkan JS -->
+    <script src="script.js"></script>
+</body>
+</html>
