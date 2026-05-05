@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portfolio | Brilian Helfanindo</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="container nav">
+        <div class="logo">Brilian.dev</div>
+        <button class="hamburger" aria-label="Toggle menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <nav>
+          <ul class="menu">
+            <li><a href="#home">Beranda</a></li>
+            <li><a href="#about">Tentang</a></li>
+            <li><a href="#skills">Keahlian</a></li>
+            <li><a href="#cms-project">Proyek</a></li>
+            <li><a href="#kontak">Kontak</a></li>
+            <li><a href="CMS/index.html" class="nav-cms-btn">Buka CMS</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <section id="home" class="hero">
+      <div class="container hero-content">
+        <div class="hero-text">
+          <h1>
+            Membangun Masa Depan <br /><span style="color: var(--primary)"
+              >Lewat Teknologi.</span
+            >
+          </h1>
+          <p>
+            Halo, saya Brilian. Seorang antusias Teknologi Informatika yang
+            berfokus pada pengembangan web modern dan solusi digital yang
+            inovatif.
+          </p>
+          <div class="hero-btns">
+            <a href="#cms-project" class="btn btn-primary">Lihat Projek</a>
+            <a
+              href="#kontak"
+              class="btn"
+              style="color: var(--text-light); margin-left: 1rem"
+              >Hubungi Saya</a
+            >
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="section">
+      <div class="container">
+        <div class="section-title">
+          <h2>Tentang Saya</h2>
+          <div class="underline"></div>
+        </div>
+
+        <div class="profile-card">
+          <div class="profile-img-container">
+            <img src="assets/Foto_Brilian.jpeg" alt="Brilian Helfanindo" />
+          </div>
+
+          <div class="profile-info">
+            <ul class="info-list">
+              <li><strong>Nama:</strong> Brilian Helfanindo Stevani</li>
+              <li><strong>TTL:</strong> Kebumen, 18 Februari 2006</li>
+              <li>
+                <strong>Alamat:</strong> Karangduwur, Ayah, Kebumen, Jawa Tengah
+              </li>
+              <li><strong>Email:</strong> brilianhelfastev@gmail.com</li>
+              <li>
+                <strong>Pendidikan:</strong> Mahasiswa Teknologi Informatika
+              </li>
+            </ul>
+            <div
+              class="profil-bio"
+              style="margin-top: 2rem; color: var(--text-dim)"
+            >
+              <p>
+                Saya adalah seseorang yang sangat tertarik di bidang Teknologi
+                Informatika. Saat ini saya fokus mengembangkan kemampuan dalam
+                Web Development, mulai dari dasar HTML/CSS hingga manajemen
+                konten digital yang dinamis.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="skills" class="section">
+      <div class="container">
+        <div class="section-title">
+          <h2>Keahlian Utama</h2>
+          <div class="underline"></div>
+        </div>
+
+        <div class="skills-grid">
+          <div class="skill-card">
+            <h3>Web Development</h3>
+            <p style="color: var(--text-dim); margin-top: 0.5rem">
+              Dasar HTML, CSS, dan JavaScript modern.
+            </p>
+          </div>
+          <div class="skill-card">
+            <h3>Office Productivity</h3>
+            <p style="color: var(--text-dim); margin-top: 0.5rem">
+              Microsoft Word, Excel, dan PowerPoint.
+            </p>
+          </div>
+          <div class="skill-card">
+            <h3>Content Management</h3>
+            <p style="color: var(--text-dim); margin-top: 0.5rem">
+              Pengelolaan data dan file sistem digital.
+            </p>
+          </div>
+          <div class="skill-card">
+            <h3>Creative Design</h3>
+            <p style="color: var(--text-dim); margin-top: 0.5rem">
+              Desain visual menggunakan Canva dan tools lainnya.
+            </p>
+          </div>
+          <div class="skill-card">
+            <h3>Troubleshooting</h3>
+            <p style="color: var(--text-dim); margin-top: 0.5rem">
+              Pemecahan masalah ringan pada sistem komputer.
+            </p>
+          </div>
+          <div class="skill-card">
+            <h3>Digital Marketing</h3>
+            <p style="color: var(--text-dim); margin-top: 0.5rem">
+              Pemahaman dasar strategi pemasaran digital.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="cms-project" class="section">
+      <div class="container">
+        <div class="project-showcase">
+          <h3>Sistem Manajemen Konten</h3>
+          <p>
+            Aplikasi CMS (Content Management System) yang memungkinkan
+            pengelolaan artikel secara dinamis dengan fitur CRUD lengkap. Proyek
+            ini mendemonstrasikan kemampuan dalam pengolahan data dan UI
+            fungsional.
+          </p>
+          <a href="CMS/index.htm" class="btn cms-glow-btn"
+            >Kelola Konten Sekarang</a
+          >
+        </div>
+      </div>
+    </section>
+
+    <section id="kontak" class="section">
+      <div class="container">
+        <div class="section-title">
+          <h2>Hubungi Saya</h2>
+          <div class="underline"></div>
+        </div>
+
+        <div class="contact-card">
+          <form class="contact-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="nama">Nama Lengkap</label>
+                <input type="text" id="nama" placeholder="Masukkan nama Anda" />
+              </div>
+              <div class="form-group">
+                <label for="email">Alamat Email</label>
+                <input type="email" id="email" placeholder="nama@email.com" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="solution">Kategori Keperluan</label>
+              <select id="solution">
+                <option>Web Development</option>
+                <option>UI/UX Design</option>
+                <option>Konsultasi IT</option>
+                <option>Lainnya</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="question">Pesan Anda</label>
+              <textarea
+                id="question"
+                rows="5"
+                placeholder="Bagaimana saya bisa membantu Anda?"
+              ></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary submit-btn">
+              Kirim Pesan
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="container">
+        <p>&copy; 2026 Brilian.dev | Jangan lupa bersyukur.</p>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
