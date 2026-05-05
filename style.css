@@ -503,6 +503,12 @@ body {
   .profile-card {
     padding: 2rem;
     gap: 2rem;
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .profile-info {
+    text-align: center;
   }
 
   .skills-grid {
