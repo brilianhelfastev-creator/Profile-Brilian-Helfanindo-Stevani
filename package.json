@@ -1,5 +1,32 @@
 {
-  "devDependencies": {
-    "gh-pages": "^6.3.0"
+  "name": "brilian-portfolio",
+  "version": "1.0.0",
+  "description": "Modern portfolio website with CMS and user authentication",
+  "main": "Backend/script.js",
+  "scripts": {
+    "start": "cd Backend && npm start",
+    "dev": "cd Backend && npm run dev",
+    "setup-db": "cd Backend && node setup-db.js",
+    "install-all": "npm install && cd Backend && npm install && cd .."
+  },
+  "keywords": [
+    "portfolio",
+    "cms",
+    "authentication",
+    "express",
+    "mysql",
+    "nodejs"
+  ],
+  "author": "Brilian Helfanindo Stevani",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "all": "^0.0.0"
   }
 }

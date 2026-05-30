@@ -13,9 +13,30 @@ exports.login = async (req, res) => {
     }
 
     // 2. Cari username di tabel 'users'
-    const [rows] = await db.query("SELECT * FROM users WHERE username = ?", [
-      username,
-    ]);
+    let rows;
+    try {
+      const [result] = await db.query(
+        "SELECT * FROM users WHERE username = ?",
+        [username],
+      );
+      rows = result;
+    } catch (dbError) {
+      console.error("❌ Database query error:", dbError);
+      // Check if database connection issue
+      if (dbError.code === "ER_ACCESS_DENIED_ERROR") {
+        return res.status(500).json({
+          success: false,
+          message: "Database authentication failed - check credentials",
+        });
+      }
+      if (dbError.code === "ER_NO_DB_ERROR") {
+        return res.status(500).json({
+          success: false,
+          message: "Database does not exist - run setup-db.js",
+        });
+      }
+      throw dbError;
+    }
 
     // Jika username tidak ditemukan di database
     if (rows.length === 0) {
@@ -40,7 +61,12 @@ exports.login = async (req, res) => {
       user: { id: user.id, username: user.username },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("❌ Login error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Server error - unable to login",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 };
 
@@ -75,7 +101,7 @@ exports.register = async (req, res) => {
     // 4. Check apakah username sudah ada
     const [existingUser] = await db.query(
       "SELECT * FROM users WHERE username = ?",
-      [username]
+      [username],
     );
 
     if (existingUser.length > 0) {
@@ -100,13 +126,14 @@ exports.register = async (req, res) => {
   }
 };
 
+// Dapatkan semua users (untuk development/testing)
 exports.getAllUsers = async (req, res) => {
   try {
-    const [users] = await db.query("SELECT id, username FROM users");
+    const [rows] = await db.query("SELECT id, username FROM users");
     res.json({
       success: true,
-      data: users,
-      total: users.length,
+      data: rows,
+      total: rows.length,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

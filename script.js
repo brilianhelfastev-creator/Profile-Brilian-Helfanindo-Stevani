@@ -5,10 +5,10 @@
 // Fungsi async untuk login ke backend
 const loginKeBackend = async (username, password) => {
   try {
-    const response = await fetch('http://localhost:5001/api/auth/login', {
-      method: 'POST',
+    const response = await fetch("http://localhost:5001/api/auth/login", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ username, password }),
     });
@@ -16,10 +16,11 @@ const loginKeBackend = async (username, password) => {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Login error:', error);
+    console.error("Login error:", error);
     return {
       success: false,
-      message: 'Gagal terhubung ke server. Pastikan backend berjalan di port 5001.',
+      message:
+        "Gagal terhubung ke server. Pastikan backend berjalan di port 5001.",
     };
   }
 };
@@ -27,10 +28,10 @@ const loginKeBackend = async (username, password) => {
 // Fungsi async untuk register ke backend
 const registerKeBackend = async (username, password, confirmPassword) => {
   try {
-    const response = await fetch('http://localhost:5001/api/auth/register', {
-      method: 'POST',
+    const response = await fetch("http://localhost:5001/api/auth/register", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ username, password, confirmPassword }),
     });
@@ -38,10 +39,11 @@ const registerKeBackend = async (username, password, confirmPassword) => {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Register error:', error);
+    console.error("Register error:", error);
     return {
       success: false,
-      message: 'Gagal terhubung ke server. Pastikan backend berjalan di port 5001.',
+      message:
+        "Gagal terhubung ke server. Pastikan backend berjalan di port 5001.",
     };
   }
 };
@@ -51,123 +53,170 @@ const showAuthMessage = (elementId, message, isError = true) => {
   const messageEl = document.getElementById(elementId);
   if (messageEl) {
     messageEl.textContent = message;
-    messageEl.className = `login-message ${isError ? 'error' : 'success'}`;
+    messageEl.className = `login-message ${isError ? "error" : "success"}`;
   }
 };
 
-// Toggle antara Login dan Register
+// Toggle antara Login dan Register dengan smooth transition
 const toggleAuthForms = () => {
-  const loginWrapper = document.getElementById('loginForm-wrapper');
-  const registerWrapper = document.getElementById('registerForm-wrapper');
-  const toggleToRegister = document.getElementById('toggleToRegister');
-  const toggleToLogin = document.getElementById('toggleToLogin');
+  const loginWrapper = document.getElementById("loginForm-wrapper");
+  const registerWrapper = document.getElementById("registerForm-wrapper");
+  const toggleToRegister = document.getElementById("toggleToRegister");
+  const toggleToLogin = document.getElementById("toggleToLogin");
 
   if (toggleToRegister) {
-    toggleToRegister.addEventListener('click', () => {
-      loginWrapper.style.display = 'none';
-      registerWrapper.style.display = 'block';
-      document.getElementById('registerForm').reset();
-      document.getElementById('registerMessage').textContent = '';
+    toggleToRegister.addEventListener("click", (e) => {
+      e.preventDefault();
+      loginWrapper.style.opacity = "0";
+      loginWrapper.style.transform = "translateY(20px)";
+
+      setTimeout(() => {
+        loginWrapper.style.display = "none";
+        registerWrapper.style.display = "block";
+        registerWrapper.style.opacity = "0";
+        registerWrapper.style.transform = "translateY(20px)";
+
+        setTimeout(() => {
+          registerWrapper.style.opacity = "1";
+          registerWrapper.style.transform = "translateY(0)";
+        }, 10);
+
+        document.getElementById("registerForm").reset();
+        document.getElementById("registerMessage").textContent = "";
+      }, 300);
     });
   }
 
   if (toggleToLogin) {
-    toggleToLogin.addEventListener('click', () => {
-      registerWrapper.style.display = 'none';
-      loginWrapper.style.display = 'block';
-      document.getElementById('loginForm').reset();
-      document.getElementById('loginMessage').textContent = '';
+    toggleToLogin.addEventListener("click", (e) => {
+      e.preventDefault();
+      registerWrapper.style.opacity = "0";
+      registerWrapper.style.transform = "translateY(20px)";
+
+      setTimeout(() => {
+        registerWrapper.style.display = "none";
+        loginWrapper.style.display = "block";
+        loginWrapper.style.opacity = "0";
+        loginWrapper.style.transform = "translateY(20px)";
+
+        setTimeout(() => {
+          loginWrapper.style.opacity = "1";
+          loginWrapper.style.transform = "translateY(0)";
+        }, 10);
+
+        document.getElementById("loginForm").reset();
+        document.getElementById("loginMessage").textContent = "";
+      }, 300);
     });
   }
+
+  // Set initial transition style
+  loginWrapper.style.transition = "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)";
+  registerWrapper.style.transition =
+    "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)";
 };
 
 // Setup login form handler
 const setupLoginForm = () => {
-  const loginForm = document.getElementById('loginForm');
+  const loginForm = document.getElementById("loginForm");
   if (!loginForm) return;
 
-  loginForm.addEventListener('submit', async (e) => {
+  loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const username = document.getElementById('login-username').value.trim();
-    const password = document.getElementById('login-password').value.trim();
+    const username = document.getElementById("login-username").value.trim();
+    const password = document.getElementById("login-password").value.trim();
 
     if (!username || !password) {
-      showAuthMessage('loginMessage', 'Username dan password harus diisi!', true);
+      showAuthMessage(
+        "loginMessage",
+        "Username dan password harus diisi!",
+        true,
+      );
       return;
     }
 
     const submitBtn = loginForm.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerText;
     submitBtn.disabled = true;
-    submitBtn.innerText = 'Sedang masuk...';
+    submitBtn.innerText = "Sedang masuk...";
 
     const result = await loginKeBackend(username, password);
 
     if (result.success) {
-      showAuthMessage('loginMessage', 'Login berhasil! Memuat halaman...', false);
-      sessionStorage.setItem('isLoggedIn', 'true');
-      sessionStorage.setItem('userInfo', JSON.stringify(result.user));
+      showAuthMessage(
+        "loginMessage",
+        "Login berhasil! Memuat halaman...",
+        false,
+      );
+      sessionStorage.setItem("isLoggedIn", "true");
+      sessionStorage.setItem("userInfo", JSON.stringify(result.user));
 
       // Sembunyikan login container, tampilkan main wrapper
       setTimeout(() => {
-        document.getElementById('login-container').style.display = 'none';
-        document.getElementById('main-wrapper').style.display = 'block';
+        document.getElementById("login-container").style.display = "none";
+        document.getElementById("main-wrapper").style.display = "block";
 
         // Trigger reveal animation on loaded content
         revealOnScroll();
         muatArtikel();
       }, 500);
     } else {
-      showAuthMessage('loginMessage', result.message || 'Login gagal!', true);
+      showAuthMessage("loginMessage", result.message || "Login gagal!", true);
       submitBtn.disabled = false;
       submitBtn.innerText = originalText;
-      document.getElementById('login-password').value = '';
+      document.getElementById("login-password").value = "";
     }
   });
 };
 
 // Setup register form handler
 const setupRegisterForm = () => {
-  const registerForm = document.getElementById('registerForm');
+  const registerForm = document.getElementById("registerForm");
   if (!registerForm) return;
 
-  registerForm.addEventListener('submit', async (e) => {
+  registerForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const username = document.getElementById('register-username').value.trim();
-    const password = document.getElementById('register-password').value.trim();
-    const confirmPassword = document.getElementById('register-confirm').value.trim();
+    const username = document.getElementById("register-username").value.trim();
+    const password = document.getElementById("register-password").value.trim();
+    const confirmPassword = document
+      .getElementById("register-confirm")
+      .value.trim();
 
     if (!username || !password || !confirmPassword) {
-      showAuthMessage('registerMessage', 'Semua field harus diisi!', true);
+      showAuthMessage("registerMessage", "Semua field harus diisi!", true);
       return;
     }
 
     if (password.length < 6) {
-      showAuthMessage('registerMessage', 'Password minimal 6 karakter!', true);
+      showAuthMessage("registerMessage", "Password minimal 6 karakter!", true);
       return;
     }
 
     const submitBtn = registerForm.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerText;
     submitBtn.disabled = true;
-    submitBtn.innerText = 'Sedang daftar...';
+    submitBtn.innerText = "Sedang daftar...";
 
     const result = await registerKeBackend(username, password, confirmPassword);
 
     if (result.success) {
-      showAuthMessage('registerMessage', result.message, false);
+      showAuthMessage("registerMessage", result.message, false);
       registerForm.reset();
 
       // Auto switch to login form setelah 2 detik
       setTimeout(() => {
-        document.getElementById('registerForm-wrapper').style.display = 'none';
-        document.getElementById('loginForm-wrapper').style.display = 'block';
-        document.getElementById('login-username').focus();
+        document.getElementById("registerForm-wrapper").style.display = "none";
+        document.getElementById("loginForm-wrapper").style.display = "block";
+        document.getElementById("login-username").focus();
       }, 2000);
     } else {
-      showAuthMessage('registerMessage', result.message || 'Pendaftaran gagal!', true);
+      showAuthMessage(
+        "registerMessage",
+        result.message || "Pendaftaran gagal!",
+        true,
+      );
       submitBtn.disabled = false;
       submitBtn.innerText = originalText;
     }
@@ -176,12 +225,12 @@ const setupRegisterForm = () => {
 
 // Setup logout button
 const setupLogoutBtn = () => {
-  const logoutBtn = document.getElementById('logoutBtn');
+  const logoutBtn = document.getElementById("logoutBtn");
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      if (confirm('Yakin ingin logout?')) {
-        sessionStorage.removeItem('isLoggedIn');
-        sessionStorage.removeItem('userInfo');
+    logoutBtn.addEventListener("click", () => {
+      if (confirm("Yakin ingin logout?")) {
+        sessionStorage.removeItem("isLoggedIn");
+        sessionStorage.removeItem("userInfo");
         location.reload();
       }
     });
@@ -190,16 +239,16 @@ const setupLogoutBtn = () => {
 
 // Cek status login saat page load
 const checkLoginStatus = () => {
-  const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+  const isLoggedIn = sessionStorage.getItem("isLoggedIn") === "true";
 
   if (isLoggedIn) {
     // User sudah login, tampilkan main wrapper
-    document.getElementById('login-container').style.display = 'none';
-    document.getElementById('main-wrapper').style.display = 'block';
+    document.getElementById("login-container").style.display = "none";
+    document.getElementById("main-wrapper").style.display = "block";
   } else {
     // User belum login, tampilkan login container
-    document.getElementById('login-container').style.display = 'flex';
-    document.getElementById('main-wrapper').style.display = 'none';
+    document.getElementById("login-container").style.display = "flex";
+    document.getElementById("main-wrapper").style.display = "none";
   }
 };
 
@@ -351,7 +400,7 @@ const muatArtikel = () => {
   displayData.forEach((item) => {
     const card = document.createElement("div");
     card.className = "article-card";
-    
+
     // Format tanggal jika ada (menggunakan ID sebagai timestamp jika tidak ada field tanggal)
     const date = new Date(item.id).toLocaleDateString("id-ID", {
       day: "numeric",
