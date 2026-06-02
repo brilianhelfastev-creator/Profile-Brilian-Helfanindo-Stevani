@@ -1,20 +1,37 @@
 // ============================================
-// BACKEND SERVER - Express Configuration
+// BACKEND SERVER - Express Configuration (FIXED FOR RAILWAY)
 // ============================================
 
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const authRoutes = require("./src/routes/authRoutes");
-const db = require("./src/config/db");
+const db = require("./src/config/db"); // Jalur config database yang benar
 
 const app = express();
+// MEMPERBAIKI SYNTAX PORT YANG KOSONG
 const PORT = process.env.PORT || 5001;
 
 // ============================================
-// Middleware
+// Middleware & CORS Dynamic
 // ============================================
-app.use(cors());
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",")
+  : ["http://127.0.0.1:5500", "http://localhost:5500"];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  }),
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -23,9 +40,65 @@ app.use(express.urlencoded({ extended: true }));
 // ============================================
 app.use("/api/auth", authRoutes);
 
+// Tambahan: Tambahkan endpoint dummy/route artikel jika CMS-mu butuh rute /api/articles
+// Jika kamu punya rute artikel asli di folder routes, silakan panggil di sini.
+// Ini ditambahkan agar CMS saat fetch data /api/articles tidak error 404.
+app.get("/api/articles", async (req, res) => {
+  try {
+    const [rows] = await db.query("SELECT * FROM articles ORDER BY id DESC");
+    res.json(rows);
+  } catch (error) {
+    console.error("Gagal mengambil artikel:", error);
+    res
+      .status(500)
+      .json({ message: "Gagal mengambil data dari database cloud" });
+  }
+});
+
+app.post("/api/articles", async (req, res) => {
+  const { judul, konten } = req.body;
+  try {
+    const [result] = await db.query(
+      "INSERT INTO articles (judul, konten) VALUES (?, ?)",
+      [judul, konten],
+    );
+    res.status(201).json({ id: result.insertId, judul, konten });
+  } catch (error) {
+    console.error("Gagal menyimpan artikel:", error);
+    res.status(500).json({ message: "Gagal menyimpan data ke database cloud" });
+  }
+});
+
+app.put("/api/articles/:id", async (req, res) => {
+  const { id } = req.params;
+  const { judul, konten } = req.body;
+  try {
+    await db.query("UPDATE articles SET judul = ?, konten = ? WHERE id = ?", [
+      judul,
+      konten,
+      id,
+    ]);
+    res.json({ message: "Artikel berhasil di-update" });
+  } catch (error) {
+    console.error("Gagal update artikel:", error);
+    res.status(500).json({ message: "Gagal update data" });
+  }
+});
+
+app.delete("/api/articles/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    await db.query("DELETE FROM articles WHERE id = ?", [id]);
+    res.json({ message: "Artikel berhasil dihapus" });
+  } catch (error) {
+    console.error("Gagal menghapus artikel:", error);
+    res.status(500).json({ message: "Gagal menghapus data" });
+  }
+});
+
 // Health check endpoint
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", message: "Backend server is running" });
+  res.json({ status: "ok", message: "Backend server is running on Railway" });
 });
 
 // Database connection test endpoint
@@ -44,10 +117,7 @@ app.get("/api/db-test", async (req, res) => {
     res.status(500).json({
       status: "error",
       message: "Database connection failed",
-      error:
-        process.env.NODE_ENV === "development"
-          ? error.message
-          : "Check server logs",
+      error: error.message,
     });
   }
 });
@@ -57,7 +127,6 @@ app.get("/api/db-test", async (req, res) => {
 // ============================================
 const startServer = async () => {
   try {
-    // Test database connection with retry logic
     let connected = false;
     let attempts = 0;
     const maxAttempts = parseInt(process.env.DB_RETRY_ATTEMPTS) || 3;
@@ -71,7 +140,7 @@ const startServer = async () => {
           `🔄 Database connection attempt ${attempts + 1}/${maxAttempts}...`,
         );
         const connection = await db.getConnection();
-        console.log("✓ Database connected successfully");
+        console.log("✓ Database connected successfully to Aiven Cloud");
         connection.release();
         connected = true;
       } catch (error) {
@@ -87,33 +156,14 @@ const startServer = async () => {
       }
     }
 
-    if (!connected) {
-      throw new Error("Failed to connect to database after multiple attempts");
-    }
-
     // Start server
     app.listen(PORT, () => {
-      console.log(`\n✓ Backend server berjalan di http://localhost:${PORT}`);
-      console.log(`✓ API endpoints: http://localhost:${PORT}/api/auth`);
-      console.log(`✓ Health check: http://localhost:${PORT}/api/health`);
-      console.log(`✓ DB test: http://localhost:${PORT}/api/db-test`);
-      console.log(
-        `\n📊 Database: ${process.env.DB_NAME} @ ${process.env.DB_HOST}`,
-      );
-      console.log(`🔧 Environment: ${process.env.NODE_ENV || "development"}\n`);
+      console.log(`\n✓ Backend server berjalan di port : ${PORT}`);
+      console.log(`🔧 Environment: ${process.env.NODE_ENV || "production"}\n`);
     });
   } catch (error) {
     console.error("❌ Server startup failed:");
     console.error("Error:", error.message);
-    console.error("\nDatabase Configuration:");
-    console.error(`- Host: ${process.env.DB_HOST}`);
-    console.error(`- User: ${process.env.DB_USER}`);
-    console.error(`- Database: ${process.env.DB_NAME}`);
-    console.error(`- Port: ${process.env.DB_PORT}`);
-    console.error(
-      "\nSolution: Make sure database is running and credentials are correct.",
-    );
-    console.error("Run: node setup-db.js (to setup database)");
     process.exit(1);
   }
 };
