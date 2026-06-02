@@ -151,10 +151,9 @@ app.get("/api/articles/:id", async (req, res) => {
 
   try {
     console.log(`📖 Fetching article ${id}...`);
-    const [articles] = await db.query(
-      "SELECT * FROM articles WHERE id = ?",
-      [id],
-    );
+    const [articles] = await db.query("SELECT * FROM articles WHERE id = ?", [
+      id,
+    ]);
 
     if (articles.length === 0) {
       return res.status(404).json({
@@ -357,7 +356,10 @@ const startServer = async () => {
         console.log("✅ Database connected successfully!\n");
         connected = true;
       } catch (error) {
-        console.error(`❌ Connection attempt ${attempts} failed:`, error.message);
+        console.error(
+          `❌ Connection attempt ${attempts} failed:`,
+          error.message,
+        );
         if (attempts < maxAttempts) {
           console.log(`⏳ Retrying in ${retryDelay}ms...\n`);
           await new Promise((resolve) => setTimeout(resolve, retryDelay));
@@ -374,13 +376,9 @@ const startServer = async () => {
       console.log("========================================");
       console.log("✅ Backend Server Started Successfully!");
       console.log("========================================\n");
-      console.log(
-        `🌐 Server running at: http://0.0.0.0:${PORT}`,
-      );
+      console.log(`🌐 Server running at: http://0.0.0.0:${PORT}`);
       console.log(`🏥 Health Check: http://0.0.0.0:${PORT}/api/health`);
-      console.log(
-        `🗄️  DB Test: http://0.0.0.0:${PORT}/api/db-test`,
-      );
+      console.log(`🗄️  DB Test: http://0.0.0.0:${PORT}/api/db-test`);
       console.log(`📚 Articles API: http://0.0.0.0:${PORT}/api/articles\n`);
       console.log(`✨ CORS Origins allowed:`);
       allowedOrigins.forEach((origin) => console.log(`   - ${origin}`));
@@ -408,4 +406,3 @@ process.on("SIGINT", () => {
   console.log("\n📛 SIGINT signal received: closing HTTP server");
   process.exit(0);
 });
-
