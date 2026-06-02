@@ -1,11 +1,15 @@
 // ============================================
-// LOGIN SYSTEM & AUTHENTICATION
+// LOGIN SYSTEM & AUTHENTICATION (CONNECTED TO RAILWAY)
 // ============================================
 
-// Fungsi async untuk login ke backend
+// URL BACKEND RAILWAY KAMU
+const API_URL =
+  "https://profile-brilian-helfanindo-stevani-production.up.railway.app";
+
+// Fungsi async untuk login ke backend Railway
 const loginKeBackend = async (username, password) => {
   try {
-    const response = await fetch("http://localhost:5001/api/auth/login", {
+    const response = await fetch(`${API_URL}/api/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -20,15 +24,15 @@ const loginKeBackend = async (username, password) => {
     return {
       success: false,
       message:
-        "Gagal terhubung ke server. Pastikan backend berjalan di port 5001.",
+        "Gagal terhubung ke server cloud. Pastikan server backend online.",
     };
   }
 };
 
-// Fungsi async untuk register ke backend
+// Fungsi async untuk register ke backend Railway
 const registerKeBackend = async (username, password, confirmPassword) => {
   try {
-    const response = await fetch("http://localhost:5001/api/auth/register", {
+    const response = await fetch(`${API_URL}/api/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -43,7 +47,7 @@ const registerKeBackend = async (username, password, confirmPassword) => {
     return {
       success: false,
       message:
-        "Gagal terhubung ke server. Pastikan backend berjalan di port 5001.",
+        "Gagal terhubung ke server cloud. Pastikan server backend online.",
     };
   }
 };
@@ -110,7 +114,6 @@ const toggleAuthForms = () => {
     });
   }
 
-  // Set initial transition style
   loginWrapper.style.transition = "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)";
   registerWrapper.style.transition =
     "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)";
@@ -152,12 +155,10 @@ const setupLoginForm = () => {
       sessionStorage.setItem("isLoggedIn", "true");
       sessionStorage.setItem("userInfo", JSON.stringify(result.user));
 
-      // Sembunyikan login container, tampilkan main wrapper
       setTimeout(() => {
         document.getElementById("login-container").style.display = "none";
         document.getElementById("main-wrapper").style.display = "block";
 
-        // Trigger reveal animation on loaded content
         revealOnScroll();
         muatArtikel();
       }, 500);
@@ -202,10 +203,13 @@ const setupRegisterForm = () => {
     const result = await registerKeBackend(username, password, confirmPassword);
 
     if (result.success) {
-      showAuthMessage("registerMessage", result.message, false);
+      showAuthMessage(
+        "registerMessage",
+        result.message || "Pendaftaran sukses!",
+        false,
+      );
       registerForm.reset();
 
-      // Auto switch to login form setelah 2 detik
       setTimeout(() => {
         document.getElementById("registerForm-wrapper").style.display = "none";
         document.getElementById("loginForm-wrapper").style.display = "block";
@@ -242,11 +246,9 @@ const checkLoginStatus = () => {
   const isLoggedIn = sessionStorage.getItem("isLoggedIn") === "true";
 
   if (isLoggedIn) {
-    // User sudah login, tampilkan main wrapper
     document.getElementById("login-container").style.display = "none";
     document.getElementById("main-wrapper").style.display = "block";
   } else {
-    // User belum login, tampilkan login container
     document.getElementById("login-container").style.display = "flex";
     document.getElementById("main-wrapper").style.display = "none";
   }
@@ -266,7 +268,6 @@ if (hamburger && menu) {
     menu.classList.toggle("active");
   });
 
-  // Close menu when clicking a link
   menu.querySelectorAll("a").forEach((link) => {
     link.addEventListener("click", () => {
       hamburger.classList.remove("active");
@@ -275,7 +276,7 @@ if (hamburger && menu) {
   });
 }
 
-// Smooth scrolling for navigation links
+// Smooth scrolling
 document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
   anchor.addEventListener("click", function (e) {
     e.preventDefault();
@@ -322,7 +323,6 @@ const revealOnScroll = () => {
   });
 };
 
-// Initial styles for reveal animation
 revealElements.forEach((el) => {
   el.style.opacity = "0";
   el.style.transform = "translateY(30px)";
@@ -330,7 +330,6 @@ revealElements.forEach((el) => {
 });
 
 window.addEventListener("scroll", revealOnScroll);
-revealOnScroll(); // Trigger once on load
 
 // Form Submission Mockup
 const contactForm = document.querySelector(".contact-form");
@@ -376,59 +375,63 @@ window.addEventListener("scroll", () => {
   });
 });
 
-// Load articles from CMS (LocalStorage)
-const muatArtikel = () => {
+// Load articles from Backend (Database Cloud Aiven)
+const muatArtikel = async () => {
   const container = document.getElementById("daftarArtikelProfil");
   if (!container) return;
 
-  const STORAGE_KEY = "CMS_ARTIKEL_APP";
-  const data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+  try {
+    container.innerHTML =
+      '<div style="color: #94a3b8; text-align: center; padding: 20px;"><p>Memuat artikel dari server...</p></div>';
 
-  if (data.length === 0) {
-    container.innerHTML = `
-      <div class="no-articles-msg">
-        <p>Belum ada artikel yang dipublikasikan.</p>
-      </div>
-    `;
-    return;
-  }
+    const response = await fetch(`${API_URL}/api/articles`);
+    const data = await response.json();
 
-  container.innerHTML = "";
-  // Tampilkan maksimal 6 artikel terbaru
-  const displayData = data.slice().reverse().slice(0, 6);
+    if (!data || data.length === 0) {
+      container.innerHTML = `
+        <div class="no-articles-msg">
+          <p>Belum ada artikel yang dipublikasikan.</p>
+        </div>
+      `;
+      return;
+    }
 
-  displayData.forEach((item) => {
-    const card = document.createElement("div");
-    card.className = "article-card";
+    container.innerHTML = "";
+    // Tampilkan maksimal 6 artikel terbaru
+    const displayData = data.slice(0, 6);
 
-    // Format tanggal jika ada (menggunakan ID sebagai timestamp jika tidak ada field tanggal)
-    const date = new Date(item.id).toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
+    displayData.forEach((item) => {
+      const card = document.createElement("div");
+      card.className = "article-card";
+
+      const tglMentah = item.created_at || item.id;
+      const date = new Date(tglMentah).toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+
+      card.innerHTML = `
+        <span class="date">${date}</span>
+        <h3>${item.judul}</h3>
+        <p>${item.konten}</p>
+      `;
+      container.appendChild(card);
     });
-
-    card.innerHTML = `
-      <span class="date">${date}</span>
-      <h3>${item.judul}</h3>
-      <p>${item.konten}</p>
-    `;
-    container.appendChild(card);
-  });
+  } catch (error) {
+    console.error("Gagal memuat artikel profil:", error);
+    container.innerHTML =
+      '<div style="color: #ef4444; text-align: center; padding: 20px;"><p>Gagal mengambil artikel dari database.</p></div>';
+  }
 };
 
 // Initial calls
 window.addEventListener("DOMContentLoaded", () => {
-  // Cek status login terlebih dahulu
   checkLoginStatus();
-
-  // Setup auth forms
   toggleAuthForms();
   setupLoginForm();
   setupRegisterForm();
   setupLogoutBtn();
-
-  // Load page content jika sudah login
   revealOnScroll();
   muatArtikel();
 });

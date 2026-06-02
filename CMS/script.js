@@ -1,30 +1,25 @@
 // ============================================
-// CMS DASHBOARD - ARTIKEL MANAGEMENT
+// CMS DASHBOARD - ARTIKEL MANAGEMENT (CONNECTED TO RAILWAY)
 // ============================================
+
+// MASUKKAN URL BACKEND RAILWAY KAMU DI SINI
+const API_URL =
+  "https://profile-brilian-helfanindo-stevani-production.up.railway.app";
 
 // Proteksi halaman: cek apakah user sudah login
 if (sessionStorage.getItem("isLoggedIn") !== "true") {
-  // Jika belum login, arahkan ke halaman index.html
   window.location.href = "../index.html";
 }
 
 // ============================================
 // Data & Elements
 // ============================================
-const STORAGE_KEY = "CMS_ARTIKEL_APP";
-let database = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-
 const form = document.getElementById("formArtikel");
 const wadah = document.getElementById("wadahArtikel");
 
 // ============================================
 // Validasi Form
 // ============================================
-/**
- * Validasi data artikel sebelum disimpan
- * @param {Object} data - Object dengan property judul dan konten
- * @returns {Boolean} - True jika valid, False jika ada error
- */
 function validasi(data) {
   let lulus = true;
   document.querySelectorAll(".pesan-error").forEach((e) => (e.innerText = ""));
@@ -44,54 +39,61 @@ function validasi(data) {
 }
 
 // ============================================
-// Display & Render Data
+// Display & Render Data (Ambil dari Database Cloud)
 // ============================================
-/**
- * Render/tampilkan semua artikel di halaman
- */
-function renderAplikasi() {
-  wadah.innerHTML = "";
+async function renderAplikasi() {
+  wadah.innerHTML =
+    '<p style="color: #94a3b8; grid-column: 1/-1; text-align: center; padding: 40px;">Memuat data dari server...</p>';
 
-  if (database.length === 0) {
-    wadah.innerHTML =
-      '<p style="color: #94a3b8; grid-column: 1/-1; text-align: center; padding: 40px;">Belum ada artikel. Silakan tambahkan artikel baru di atas.</p>';
-    return;
-  }
+  try {
+    // Ambil data dari backend Railway
+    const respon = await fetch(`${API_URL}/api/articles`);
+    const artikelDariServer = await respon.json();
 
-  // Tampilkan artikel dari yang terbaru
-  database.reverse().forEach((item) => {
-    const kartu = document.createElement("div");
-    kartu.className = "kartu";
+    wadah.innerHTML = "";
 
-    // Format tanggal dari ID (timestamp)
-    const date = new Date(item.id).toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
+    if (!artikelDariServer || artikelDariServer.length === 0) {
+      wadah.innerHTML =
+        '<p style="color: #94a3b8; grid-column: 1/-1; text-align: center; padding: 40px;">Belum ada artikel. Silakan tambahkan artikel baru di atas.</p>';
+      return;
+    }
 
-    kartu.innerHTML = `
+    // Tampilkan artikel
+    artikelDariServer.forEach((item) => {
+      // Menangani format tanggal dari database (created_at atau id)
+      const tglMentah = item.created_at || item.id;
+      const date = new Date(tglMentah).toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+
+      const kartu = document.createElement("div");
+      kartu.className = "kartu";
+      kartu.innerHTML = `
             <span class="badge">Artikel</span>
             <span class="date-badge">${date}</span>
             <h4>${item.judul}</h4>
             <p>${item.konten.substring(0, 100)}${item.konten.length > 100 ? "..." : ""}</p>
             <div class="aksi-kartu">
-                <button onclick="siapkanUpdate('${item.id}')" class="btn-edit">Edit</button>
+                <button onclick="siapkanUpdate('${item.id}', '${encodeURIComponent(item.judul)}', '${encodeURIComponent(item.konten)}')" class="btn-edit">Edit</button>
                 <button onclick="hapusData('${item.id}')" class="btn-hapus">Hapus</button>
             </div>
         `;
-    wadah.appendChild(kartu);
-  });
-  database.reverse(); // Kembalikan urutan untuk logic lainnya
+      wadah.appendChild(kartu);
+    });
+  } catch (error) {
+    console.error("Gagal mengambil data:", error);
+    wadah.innerHTML =
+      '<p style="color: #ef4444; grid-column: 1/-1; text-align: center; padding: 40px;">Gagal tersambung ke server backend!</p>';
+  }
 }
 
 // ============================================
-// CRUD Operations
+// CRUD Operations (Kirim/Ubah/Hapus ke Server)
 // ============================================
-/**
- * Simpan artikel baru atau update artikel existing
- */
-form.addEventListener("submit", (e) => {
+
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const id = document.getElementById("artikelId").value;
@@ -100,71 +102,76 @@ form.addEventListener("submit", (e) => {
     konten: document.getElementById("konten").value.trim(),
   };
 
-  // Validasi sebelum simpan
   if (!validasi(payload)) return;
 
-  if (id) {
-    // Update artikel existing
-    const index = database.findIndex((a) => a.id == id);
-    if (index > -1) {
-      database[index] = { id, ...payload };
+  try {
+    let respon;
+    if (id) {
+      // UPDATE DATA (PUT) ke Server
+      respon = await fetch(`${API_URL}/api/articles/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } else {
+      // TAMBAH DATA BARU (POST) ke Server
+      respon = await fetch(`${API_URL}/api/articles`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
     }
-  } else {
-    // Tambah artikel baru
-    const dataBaru = { id: +new Date(), ...payload };
-    database.push(dataBaru);
+
+    if (respon.ok) {
+      resetFormulir();
+      renderAplikasi();
+      alert(
+        id
+          ? "Artikel berhasil diupdate di database cloud!"
+          : "Artikel berhasil disimpan ke database cloud!",
+      );
+    } else {
+      alert("Gagal menyimpan ke server backend.");
+    }
+  } catch (error) {
+    console.error("Error saat menyimpan:", error);
+    alert("Terjadi kesalahan koneksi ke server.");
   }
-
-  // Simpan ke localStorage
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(database));
-  resetFormulir();
-  renderAplikasi();
-
-  // Notifikasi ke user
-  const successMsg = id
-    ? "Artikel berhasil diupdate!"
-    : "Artikel berhasil ditambahkan!";
-  alert(successMsg);
 });
 
-/**
- * Hapus artikel berdasarkan ID
- * @param {String|Number} id - ID artikel yang akan dihapus
- */
-window.hapusData = (id) => {
-  if (confirm("Yakin ingin menghapus artikel ini?")) {
-    database = database.filter((a) => a.id != id);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(database));
-    renderAplikasi();
+// HAPUS DATA dari Server
+window.hapusData = async (id) => {
+  if (confirm("Yakin ingin menghapus artikel ini dari database cloud?")) {
+    try {
+      const respon = await fetch(`${API_URL}/api/articles/${id}`, {
+        method: "DELETE",
+      });
+
+      if (respon.ok) {
+        renderAplikasi();
+        alert("Artikel berhasil dihapus!");
+      } else {
+        alert("Gagal menghapus data di server.");
+      }
+    } catch (error) {
+      console.error("Error saat menghapus:", error);
+      alert("Gagal tersambung ke server.");
+    }
   }
 };
 
-/**
- * Siapkan form untuk edit artikel
- * @param {String|Number} id - ID artikel yang akan diedit
- */
-window.siapkanUpdate = (id) => {
-  const data = database.find((a) => a.id == id);
-  if (!data) {
-    alert("Artikel tidak ditemukan!");
-    return;
-  }
+// SIAPKAN FORM UNTUK EDIT
+window.siapkanUpdate = (id, judulTerencode, kontenTerencode) => {
+  document.getElementById("artikelId").value = id;
+  document.getElementById("judul").value = decodeURIComponent(judulTerencode);
+  document.getElementById("konten").value = decodeURIComponent(kontenTerencode);
 
-  document.getElementById("artikelId").value = data.id;
-  document.getElementById("judul").value = data.judul;
-  document.getElementById("konten").value = data.konten;
-
-  // Update label tombol
   document.getElementById("tombolSimpan").innerText = "Simpan Perubahan";
   document.getElementById("tombolBatal").style.display = "inline-block";
 
-  // Scroll ke form
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
-/**
- * Reset form ke state awal (untuk buat artikel baru)
- */
 function resetFormulir() {
   form.reset();
   document.getElementById("artikelId").value = "";
@@ -173,26 +180,17 @@ function resetFormulir() {
 }
 
 // ============================================
-// Event Listeners
+// Event Listeners & Init
 // ============================================
 document.getElementById("tombolBatal").addEventListener("click", resetFormulir);
 
-/**
- * Logout dan kembali ke halaman login
- */
 window.logoutAdmin = () => {
   if (confirm("Apakah Anda yakin ingin keluar?")) {
-    // Hapus session data
     sessionStorage.removeItem("isLoggedIn");
     sessionStorage.removeItem("userInfo");
-
-    // Redirect ke halaman awal
     window.location.href = "../index.html";
   }
 };
 
-// ============================================
-// Initialization
-// ============================================
-// Jalankan render saat halaman dimuat
+// Jalankan aplikasi langsung panggil server cloud
 renderAplikasi();
