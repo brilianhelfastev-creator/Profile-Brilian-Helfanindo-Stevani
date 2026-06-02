@@ -104,12 +104,10 @@ app.get("/api/health", (req, res) => {
 // Database connection test endpoint
 app.get("/api/db-test", async (req, res) => {
   try {
-    const connection = await db.getConnection();
-    const [rows] = await connection.query("SELECT 1 as test");
-    connection.release();
+    const [rows] = await db.query("SELECT 1 as test");
     res.json({
       status: "ok",
-      message: "Database connection successful",
+      message: "Database connection successful to Aiven Cloud",
       database: process.env.DB_NAME,
     });
   } catch (error) {
@@ -139,9 +137,8 @@ const startServer = async () => {
         console.log(
           `🔄 Database connection attempt ${attempts + 1}/${maxAttempts}...`,
         );
-        const connection = await db.getConnection();
+        const [rows] = await db.query("SELECT 1 as test");
         console.log("✓ Database connected successfully to Aiven Cloud");
-        connection.release();
         connected = true;
       } catch (error) {
         attempts++;
@@ -158,8 +155,12 @@ const startServer = async () => {
 
     // Start server
     app.listen(PORT, () => {
-      console.log(`\n✓ Backend server berjalan di port : ${PORT}`);
-      console.log(`🔧 Environment: ${process.env.NODE_ENV || "production"}\n`);
+      console.log(`\n✓ Backend server berjalan di port: ${PORT}`);
+      console.log(
+        `✓ Database: ${process.env.DB_NAME} @ ${process.env.DB_HOST}`,
+      );
+      console.log(`🔧 Environment: ${process.env.NODE_ENV || "production"}`);
+      console.log(`📍 API Health Check: http://localhost:${PORT}/api/health\n`);
     });
   } catch (error) {
     console.error("❌ Server startup failed:");
