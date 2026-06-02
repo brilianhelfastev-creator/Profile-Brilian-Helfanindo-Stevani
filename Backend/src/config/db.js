@@ -1,6 +1,6 @@
 const mysql = require("mysql2/promise");
 
-// Konfigurasi MySQL Connection Pool dengan Error Handling
+// Konfigurasi MySQL Connection Pool dengan SSL Support untuk Aiven
 const pool = mysql.createPool({
   host: process.env.DB_HOST || "localhost",
   user: process.env.DB_USER || "root",
@@ -11,6 +11,8 @@ const pool = mysql.createPool({
   connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT) || 10,
   queueLimit: 0,
   enableKeepAlive: true,
+  // SSL Configuration untuk Aiven Cloud MySQL
+  ssl: process.env.NODE_ENV === "production" ? "Amazon RootCA1" : false,
 });
 
 // Handle pool errors
