@@ -1,10 +1,9 @@
 // ============================================
-// LOGIN SYSTEM & AUTHENTICATION (CONNECTED TO RAILWAY)
+// LOGIN SYSTEM & AUTHENTICATION (LOCAL BACKEND)
 // ============================================
 
-// URL BACKEND RAILWAY KAMU
-const API_URL =
-  "https://profile-brilian-helfanindo-stevani-production.up.railway.app";
+// URL BACKEND LOCAL - DEVELOPMENT
+const API_URL = "http://localhost:5001";
 
 // Fungsi async untuk login ke backend Railway
 const loginKeBackend = async (username, password) => {

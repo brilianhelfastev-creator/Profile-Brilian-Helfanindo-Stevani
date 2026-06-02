@@ -1,6 +1,6 @@
 // ============================================
-// BACKEND SERVER - Express.js for Railway + Aiven Cloud MySQL
-// Production-ready configuration with full CRUD APIs
+// BACKEND SERVER - Express.js + MySQL Local
+// Clean, production-ready authentication system
 // ============================================
 
 require("dotenv").config();
@@ -17,17 +17,18 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 // ============================================
-// CORS Configuration - Dynamic for GitHub Pages + Local Development
+// CORS Configuration - Local Development Focus
 // ============================================
-const allowedOrigins = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim())
-  : [
-      "https://brilianhelfastev-creator.github.io",
-      "http://127.0.0.1:5500",
-      "http://localhost:5500",
-      "http://localhost:3000",
-      "http://127.0.0.1:3000",
-    ];
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:5000",
+  "http://localhost:5500",
+  "http://localhost:8000",
+  "http://127.0.0.1:5500",
+  "http://127.0.0.1:3000",
+  "http://127.0.0.1:8000",
+  "https://brilianhelfastev-creator.github.io", // GitHub Pages backup
+];
 
 app.use(
   cors({
@@ -77,7 +78,7 @@ app.use("/api/auth", authRoutes);
  */
 app.get("/api/articles", async (req, res) => {
   try {
-    console.log("📖 Fetching all articles from Aiven Cloud...");
+    console.log("📖 Fetching all articles from database...");
     const [articles] = await db.query(
       "SELECT * FROM articles ORDER BY created_at DESC, id DESC LIMIT 100",
     );
