@@ -4,11 +4,11 @@ const mysql = require("mysql2/promise");
 // MySQL Connection Pool - Local Database Only
 // ============================================
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || "localhost",
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME || "profile_db",
-  port: process.env.DB_PORT || 3306,
+  host: "localhost",
+  user: "root",
+  password: "",
+  database: "profile_db",
+  port: 3306,
   waitForConnections: true,
   connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT) || 10,
   queueLimit: 0,
