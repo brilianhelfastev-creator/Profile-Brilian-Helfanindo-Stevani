@@ -2,8 +2,8 @@
 // LOGIN SYSTEM & AUTHENTICATION (LOCAL BACKEND)
 // ============================================
 
-// URL BACKEND LOCAL - DEVELOPMENT
-const API_URL = "http://localhost:5001";
+// URL BACKEND PRODUCTION - VERCEL
+const API_URL = "https://profile-backend-phi.vercel.app";
 
 // Fungsi async untuk login ke backend Railway
 const loginKeBackend = async (username, password) => {
@@ -67,6 +67,8 @@ const toggleAuthForms = () => {
   const toggleToRegister = document.getElementById("toggleToRegister");
   const toggleToLogin = document.getElementById("toggleToLogin");
 
+  if (!loginWrapper || !registerWrapper) return;
+
   if (toggleToRegister) {
     toggleToRegister.addEventListener("click", (e) => {
       e.preventDefault();
@@ -84,8 +86,10 @@ const toggleAuthForms = () => {
           registerWrapper.style.transform = "translateY(0)";
         }, 10);
 
-        document.getElementById("registerForm").reset();
-        document.getElementById("registerMessage").textContent = "";
+        const registerForm = document.getElementById("registerForm");
+        if (registerForm) registerForm.reset();
+        const registerMessage = document.getElementById("registerMessage");
+        if (registerMessage) registerMessage.textContent = "";
       }, 300);
     });
   }
@@ -107,8 +111,10 @@ const toggleAuthForms = () => {
           loginWrapper.style.transform = "translateY(0)";
         }, 10);
 
-        document.getElementById("loginForm").reset();
-        document.getElementById("loginMessage").textContent = "";
+        const loginForm = document.getElementById("loginForm");
+        if (loginForm) loginForm.reset();
+        const loginMessage = document.getElementById("loginMessage");
+        if (loginMessage) loginMessage.textContent = "";
       }, 300);
     });
   }
@@ -243,13 +249,15 @@ const setupLogoutBtn = () => {
 // Cek status login saat page load
 const checkLoginStatus = () => {
   const isLoggedIn = sessionStorage.getItem("isLoggedIn") === "true";
+  const loginContainer = document.getElementById("login-container");
+  const mainWrapper = document.getElementById("main-wrapper");
 
   if (isLoggedIn) {
-    document.getElementById("login-container").style.display = "none";
-    document.getElementById("main-wrapper").style.display = "block";
+    if (loginContainer) loginContainer.style.display = "none";
+    if (mainWrapper) mainWrapper.style.display = "block";
   } else {
-    document.getElementById("login-container").style.display = "flex";
-    document.getElementById("main-wrapper").style.display = "none";
+    if (loginContainer) loginContainer.style.display = "flex";
+    if (mainWrapper) mainWrapper.style.display = "none";
   }
 };
 
@@ -373,8 +381,7 @@ window.addEventListener("scroll", () => {
     }
   });
 });
-
-// Load articles from Backend (Database Cloud Aiven)
+// Load articles from Backend (Database Lokal)
 const muatArtikel = async () => {
   const container = document.getElementById("daftarArtikelProfil");
   if (!container) return;
@@ -384,9 +391,10 @@ const muatArtikel = async () => {
       '<div style="color: #94a3b8; text-align: center; padding: 20px;"><p>Memuat artikel dari server...</p></div>';
 
     const response = await fetch(`${API_URL}/api/articles`);
-    const data = await response.json();
+    const result = await response.json(); // Mengubah nama variabel agar lebih jelas
 
-    if (!data || data.length === 0) {
+    // Cek sesuai format respons dari backend lokal kamu (result.data)
+    if (!result.success || !result.data || result.data.length === 0) {
       container.innerHTML = `
         <div class="no-articles-msg">
           <p>Belum ada artikel yang dipublikasikan.</p>
@@ -396,8 +404,8 @@ const muatArtikel = async () => {
     }
 
     container.innerHTML = "";
-    // Tampilkan maksimal 6 artikel terbaru
-    const displayData = data.slice(0, 6);
+    // Tampilkan maksimal 6 artikel terbaru dari array result.data
+    const displayData = result.data.slice(0, 6);
 
     displayData.forEach((item) => {
       const card = document.createElement("div");
@@ -424,6 +432,62 @@ const muatArtikel = async () => {
   }
 };
 
+// ============================================
+// MAP & SERVICE WORKER (Tugas Pertemuan 12)
+// ============================================
+
+// Fungsi untuk memuat peta
+const loadMapLocation = async () => {
+  try {
+    const response = await fetch(`${API_URL}/api/auth/users`);
+    const result = await response.json();
+    
+    if (result.success && result.data && result.data.length > 0) {
+      // Ambil user pertama dari database untuk lokasi
+      const user = result.data[0]; 
+      
+      if (user.latitude && user.longitude) {
+        const lat = parseFloat(user.latitude);
+        const lng = parseFloat(user.longitude);
+
+        const mapContainer = document.getElementById('map');
+        if (!mapContainer) return;
+
+        // Inisialisasi Leaflet Map
+        const map = L.map('map').setView([lat, lng], 13);
+        
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        L.marker([lat, lng]).addTo(map)
+          .bindPopup(`<b>Lokasi: ${user.username}</b><br>Lat: ${lat}<br>Lng: ${lng}`)
+          .openPopup();
+      }
+    }
+  } catch (error) {
+    console.error("Gagal memuat peta Leaflet:", error);
+  }
+};
+
+// Fungsi Registrasi Service Worker & Push Notification
+const setupServiceWorker = () => {
+  if ('serviceWorker' in navigator && 'PushManager' in window) {
+    navigator.serviceWorker.register('sw.js')
+      .then((swReg) => {
+        console.log('Service Worker berhasil didaftarkan!', swReg);
+        // Meminta Izin Notifikasi
+        Notification.requestPermission().then((permission) => {
+          if (permission === 'granted') {
+            console.log('Izin Notifikasi Diberikan!');
+          }
+        });
+      })
+      .catch((error) => console.error('Gagal daftar Service Worker:', error));
+  }
+};
+
 // Initial calls
 window.addEventListener("DOMContentLoaded", () => {
   checkLoginStatus();
@@ -433,4 +497,11 @@ window.addEventListener("DOMContentLoaded", () => {
   setupLogoutBtn();
   revealOnScroll();
   muatArtikel();
+  setupServiceWorker();
+  
+  // Karena map butuh div yang visible, lebih baik loadMapLocation dipanggil
+  // setelah UI dipastikan terbuka jika menggunakan hide/show div
+  setTimeout(() => {
+    loadMapLocation();
+  }, 1000);
 });

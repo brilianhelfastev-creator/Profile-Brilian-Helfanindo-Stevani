@@ -2,13 +2,12 @@
 // CMS DASHBOARD - ARTIKEL MANAGEMENT (CONNECTED TO RAILWAY)
 // ============================================
 
-// MASUKKAN URL BACKEND RAILWAY KAMU DI SINI
-const API_URL =
-  "https://profile-brilian-helfanindo-stevani-production.up.railway.app";
+// URL BACKEND LOKAL
+const API_URL = "http://localhost:5001";
 
 // Proteksi halaman: cek apakah user sudah login
 if (sessionStorage.getItem("isLoggedIn") !== "true") {
-  window.location.href = "../index.html";
+  window.location.href = "../Frontend/index.html";
 }
 
 // ============================================
@@ -46,9 +45,14 @@ async function renderAplikasi() {
     '<p style="color: #94a3b8; grid-column: 1/-1; text-align: center; padding: 40px;">Memuat data dari server...</p>';
 
   try {
-    // Ambil data dari backend Railway
+    // Ambil data dari backend lokal
     const respon = await fetch(`${API_URL}/api/articles`);
-    const artikelDariServer = await respon.json();
+    let artikelDariServer = await respon.json();
+    
+    // Sesuaikan format data jika dibungkus dalam properti 'data'
+    if (artikelDariServer && !Array.isArray(artikelDariServer) && artikelDariServer.data) {
+      artikelDariServer = artikelDariServer.data;
+    }
 
     wadah.innerHTML = "";
 
@@ -188,7 +192,7 @@ window.logoutAdmin = () => {
   if (confirm("Apakah Anda yakin ingin keluar?")) {
     sessionStorage.removeItem("isLoggedIn");
     sessionStorage.removeItem("userInfo");
-    window.location.href = "../index.html";
+    window.location.href = "../Frontend/index.html";
   }
 };
 

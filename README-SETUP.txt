@@ -12,7 +12,7 @@ OPSI 1 - MANUAL (Paling Kontrol):
    node script.js
    
 3. Terminal 2:
-   Buka index.html di VS Code
+   Buka Frontend/index.html di VS Code
    Klik "Go Live" (Live Server extension)
 
 Browser akan buka: http://localhost:5500
@@ -30,7 +30,7 @@ OPSI 3 - HANYA BACKEND (.bat):
 ===============================
 Double-click file: start-backend.bat
 - Backend akan running
-- Buka index.html di VS Code
+- Buka Frontend/index.html di VS Code
 - Klik "Go Live" untuk frontend
 
 
@@ -52,8 +52,8 @@ REQUIREMENTS:
 FOLDER PENTING:
 ===============
 - Backend/           → Kode server Node.js
-- index.html         → Form login frontend
-- script.js          → Koneksi ke backend
+- Frontend/index.html → Form login frontend
+- Frontend/script.js  → Koneksi ke backend
 - profile_db.sql     → Database schema
 
 

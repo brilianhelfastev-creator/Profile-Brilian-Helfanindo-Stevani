@@ -4,8 +4,6 @@
   "description": "Backend API untuk authentication dan management user",
   "main": "script.js",
   "scripts": {
-    "setup-db": "node setup-db.js",
-    "db-test": "node db-test.js",
     "start": "node script.js",
     "dev": "nodemon script.js"
   },
